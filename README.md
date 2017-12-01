@@ -49,6 +49,7 @@ Organizer:
 Can see: 
 - Who has responded
 - The free times that all responded participants have in common
+
 Cannot see:
 - The free times selected by any single participant
 
@@ -56,6 +57,7 @@ Participants:
 Can See:
 - Original date/time range the meeting was planned to be in
 - Meeting duration
+
 Cannot See:
 - Free times selected by organizer
 - Free times selected by other participants
