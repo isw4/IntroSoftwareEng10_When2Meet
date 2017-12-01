@@ -1,5 +1,7 @@
 """
-Class to represent timeslots and perform some calculations
+Class to represent timeslots and perform some calculations. This is a modified
+version of the original timeslot class. Data stored about the events from the
+user has been minimized, and other functions implemented.
 """
 
 import arrow, calc
@@ -9,17 +11,11 @@ DESCENDING = -1
 
 class TimeSlot:
 
-	def __init__(self, contains, begin_datetime, end_datetime):
+	def __init__(self, begin_datetime, end_datetime):
 		"""
 		TimeSlot object, used to represent time slots. Contains
 		the following fields:
 
-		contains:	a list of dictionaries. Each dictionary contains information
-					about the events that make up this timeslot. Fields of the
-					dictionary are:
-			summary:		Description of the event
-			begin_datetime:	see below
-			end_datetime:	see below
 		begin_datetime:	isoformatted timedate string, about the date and time
 						the merged event begins
 		end_datetime:	isoformatted timedate string, about the date and time
@@ -28,12 +24,6 @@ class TimeSlot:
 		assert arrow.get(begin_datetime) < arrow.get(end_datetime)
 		self.begin_datetime = begin_datetime
 		self.end_datetime = end_datetime
-		if isinstance(contains, str):
-			self.contains = [ { 'summary': contains,
-								'begin_datetime': begin_datetime,
-								'end_datetime': end_datetime } ]
-		else:
-			self.contains = contains
 
 
 	def merge(self, other):
@@ -58,7 +48,6 @@ class TimeSlot:
 			return None
 
 		# Mergable
-		merged_contains = self.contains + other.contains
 		if self_begin <= other_begin:
 			merged_begin_datetime = self_begin.isoformat()
 		else:
@@ -69,17 +58,53 @@ class TimeSlot:
 		else:
 			merged_end_datetime = other_end.isoformat()
 
-		return TimeSlot(merged_contains, merged_begin_datetime, merged_end_datetime)
+		return TimeSlot(merged_begin_datetime, merged_end_datetime)
 
 
-	def find_freebusy_from(self, busylist):
+	def intersect(self, other):
+		"""
+		Tries to find the intersection between two TimeSlot objects
+
+		Args:
+			other:   TimeSlot object, representing another busy time
+
+		Returns:
+			TimeSlot object, if there is an intersection
+			None, if there is no intersection
+		"""
+		self_begin = arrow.get(self.begin_datetime)
+		self_end = arrow.get(self.end_datetime)
+		other_begin = arrow.get(other.begin_datetime)
+		other_end = arrow.get(other.end_datetime)
+
+		# No intersection
+		if self_end <= other_begin or self_begin >= other_end:
+			return None
+
+		# Has an intersection
+		if self_begin >= other_begin:
+			intersect_begin_datetime = self_begin.isoformat()
+		else:
+			intersect_begin_datetime = other_begin.isoformat()
+
+		if self_end <= other_end:
+			intersect_end_datetime = self_end.isoformat()
+		else:
+			intersect_end_datetime = other_end.isoformat()
+
+		return TimeSlot(intersect_begin_datetime, intersect_end_datetime)
+
+
+	def find_freebusy_from(self, busylist, duration='00:00'):
 		"""
 		Finds a list of free times between the list of busy times. All busy
-		times do not have to be merged.
+		times do not have to be merged. Free times that are < duration are
+		eliminated.
 
 		Args:
 			self:		TimeSlot object, representing a single slot of free time
 			busylist:	a list of TimeSlot objects, representing busy times
+			duration:	str, HH:mm of the meeting duration
 		
 		Returns:
 			a list of TimeSlot objects, representing free times
@@ -128,6 +153,8 @@ class TimeSlot:
 		#####
 		# There are some busy events in the free period. Finding free and busy times
 		#####
+		dur_h = int(duration.split(':')[0])
+		dur_m = int(duration.split(':')[1])
 		freetimes = [ ]
 		busytimes = [ ]
 		merged_list = calc.merge_single_list(reduced_list)
@@ -186,8 +213,11 @@ class TimeSlot:
 		# Convert the list of free time dicts into list of TimeSlots
 		fts = freetimes
 		freetimes = [ ]
+		print('duration: {}:{}'.format(dur_h, dur_m))
 		for ft in fts:
-			freetimes.append(TimeSlot('Free Time', ft['begin_datetime'], ft['end_datetime']))
+			if arrow.get(ft['begin_datetime']).shift(hours=+dur_h, minutes=+dur_m) <= arrow.get(ft['end_datetime']):
+				# the freetime can accomodate the meeting duration
+				freetimes.append(TimeSlot(ft['begin_datetime'], ft['end_datetime']))
 
 		return [freetimes, busytimes]
 
@@ -195,7 +225,6 @@ class TimeSlot:
 	def serialize(self):
 		""" To convert the object into something that can be sent to browser """
 		return {
-			'contains': self.contains,
 			'begin_datetime': self.begin_datetime,
 			'end_datetime': self.end_datetime
 		}
@@ -203,30 +232,15 @@ class TimeSlot:
 
 	def equals(self, other):
 		""" To be able to easily compare objects """
-		if self.begin_datetime != other.begin_datetime \
-		or self.end_datetime != other.end_datetime \
-		or len(self.contains) != len(other.contains):
+		if self.begin_datetime != other.begin_datetime or self.end_datetime != other.end_datetime:
 			return False
-		for i in range(0, len(self.contains)):
-			if self.contains[i]['summary'] != other.contains[i]['summary'] \
-			or self.contains[i]['begin_datetime'] != other.contains[i]['begin_datetime'] \
-			or self.contains[i]['end_datetime'] != other.contains[i]['end_datetime']:
-				return False
 		return True
 
 
 	def __repr__(self):
 		""" To be able to print object """
-		c = None
-		for event in self.contains:
-			next_c = "'summary': '{}', 'begin_datetime': '{}', 'end_datetime': '{}'".format(event['summary'], event['begin_datetime'], event['end_datetime'])
-			if c == None:
-				c = '[{'+next_c+'}'
-			else:
-				c = c+', {'+next_c+'}'
-		c += ']'
 		s = "'begin_datetime': '{}', 'end_datetime': '{}', ".format(self.begin_datetime, self.end_datetime)
-		return '{'+s+c+'}'
+		return '{'+s+'}'
 
 
 #################################################################################

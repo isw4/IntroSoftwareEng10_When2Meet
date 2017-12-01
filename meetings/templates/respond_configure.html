@@ -1,0 +1,44 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<div class='jumbotron'>
+	<h1>When2Meet: Respond to Meeting</h1>
+</div>
+
+
+<div class="container">
+	<div class='row'>
+		<div class='col-md-6'>
+			<h4>Select the Calendars you want to consider as your busy times</h4>
+			<br>
+			<div class='form-check'>
+				<form action='{{ session.submit_route }}' method='post'>
+					{% for cal in session.calendars if cal.selected %}
+						<label class="form-check-label">
+							<input class="form-check-input" type="checkbox" name="checkbox" value="{{ cal.id }}">
+							{{ cal.summary }}
+						</label>
+					{% endfor %}
+					<br>
+					<input type="hidden" id="timezone" name="timezone" value="">
+					<button type='submit' class='btn btn-success'>Submit</button>
+				</form>
+			</div>
+		</div>
+
+		<div class='col-md-6'>
+			<h3>Event Description</h3>
+			<textarea name='description' class="form-control" maxlength="255" rows ="6" readonly>{{ session.desc }}</textarea>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		// Guesses the user timezone for the form in +-HH:mm format
+		$('#timezone').val(moment.tz(moment.tz.guess()).format('Z'));
+	})
+</script>
+
+{% endblock %}

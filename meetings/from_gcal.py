@@ -145,4 +145,4 @@ def to_timeslot(instance):
 		print("Instance has no specified start and end time or date")
 		assert False
 
-	return TimeSlot(instance['summary'], begin_datetime, end_datetime)
+	return TimeSlot(begin_datetime, end_datetime)

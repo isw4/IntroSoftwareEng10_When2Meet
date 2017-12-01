@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<div class='jumbotron'>
+	<h1>When2Meet: Meeting Created!</h1>
+</div>
+
+<div class="container">
+	<h3>My Link</h3>
+	<p>To check on the status of this When2Meet (please save this link): {{ session.send.inviter_link }}</p>
+
+	<hr>
+	<h3>Send Invites</h3>
+	{% for invitee in session.send.invitees %}
+		<p><a href="mailto:{{ invitee.email }}?subject=When2Meet%20Invitation&body={{ session.send.desc }}{{ invitee.link }}">Send Invite to: {{ invitee.email }}</a></p>
+	{% endfor %}
+
+
+</div>
+
+{% endblock %}

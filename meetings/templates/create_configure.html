@@ -1,0 +1,120 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<div class='jumbotron'>
+	<h1>When2Meet: Create Meeting</h1>
+</div>
+
+<div class="container">
+	<form action="{{ url_for('create_select_times') }}" method="post" id="daterangeform">
+		<div class="row">
+			<div class="col-md-3">
+				<label for="begin_time">Time Start</label>
+				<input type="time" class="form-control" name="begin_time" id="begin" value="{{ session.begin_datetime | fmttime }}">
+			</div>
+
+			<div class="col-md-3">
+				<label for="end_time">Time End</label>
+				<input type="time" class="form-control" name="end_time" id="end" value="{{ session.end_datetime | fmttime }}">
+			</div>
+
+			<div class="col-md-3">
+				<label for="daterange">Date Range</label>
+				<input class="form-control" type="text" name="daterange" size="15"
+					{% if session.daterange is defined %}
+						value="{{session.daterange}}"
+					{% endif %}
+					class="pull-down"
+					style="background: #fff; cursor: pointer; padding: 5px 10px border: 1px solid #ccc" >
+				<script type="text/javascript">
+					$(function() {
+						$('input[name="daterange"]').daterangepicker(
+							{    ranges: {
+								'Today': [moment(), moment()],
+								'Tomorrow':[moment().add(1, 'days'),
+											moment().add(1, 'days')], 
+								'This week':[moment(), moment().endOf('week')],
+								'Next week':[moment().add(7, 'days').startOf('week'),
+											moment().add(7, 'days').endOf('week')],
+								'This month':[moment(), moment().endOf('month')],
+								'Within two weeks':[moment(),moment().add(15, 'days')]
+							}}
+						);
+					});
+				</script>
+			</div>
+
+			<div class="col-md-2">
+				<label for="end_time">Meeting Duration</label>
+				<select name='duration' class='form-control'>
+					{% for h in range(0,21) %}
+						{% for m in range(0,60,15) %}
+							{% if h != 0 or m != 0 %}
+								<option value='{{ h|string+":"+m|string }}'>
+								{% if h == 0 %}
+									{{ m|string+"min" }}
+								{% elif m == 0 %}
+									{{ h|string+"h" }}
+								{% else %}
+									{{ h|string+"h "+m|string+"min" }}
+								{% endif %}
+								</option>
+							{% endif %}
+						{% endfor %}
+					{% endfor %}
+				</select>
+			</div>
+
+			<div class="col-md-1 submit">
+				<input type="hidden" id="timezone" name="timezone" value="">
+				<button type="submit" class="submit btn btn-primary" id="submit">Submit</button>
+			</div>
+		</div>
+
+		<hr>
+		<h4>Select the Calendars you want to consider as your busy times</h4>
+		<div class='form-check'>
+			{% for cal in session.calendars %}
+				<label class="form-check-label">
+					<input class="form-check-input" type="checkbox" name="checkbox" value="{{ cal.id }}">
+					{{ cal.summary }}
+				</label>
+			{% endfor %}
+		</div>
+
+	</form>
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			// Guesses the user timezone for the form in +-HH:mm format
+			$('#timezone').val(moment.tz(moment.tz.guess()).format('Z'));
+
+			// Sets up the event listeners when the page is first loaded(not logged in)
+			// Disables the submit button whenever the time inputs are invalid
+			$('#begin').change(function(){
+				var beginTime = $(this).val().replace(':','');
+				var endTime = $("#end").val().replace(':','');
+				if (beginTime >= endTime){
+					$('#submit').attr("disabled", "disabled");
+				}
+				else {
+					$('#submit').removeAttr("disabled");
+				}
+			})
+
+			$('#end').change(function(){
+				var beginTime = $("#begin").val().replace(':','');
+				var endTime = $(this).val().replace(':','');
+				if (beginTime >= endTime){
+					$('#submit').attr("disabled", "disabled");
+				}
+				else {
+					$('#submit').removeAttr("disabled");
+				}
+			})
+		}) //end on document ready
+	</script>
+</div>
+
+{% endblock %}

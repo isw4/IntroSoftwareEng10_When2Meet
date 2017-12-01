@@ -19,7 +19,7 @@ def init_frees_by_date(iso_begin_datetime, iso_end_datetime):
 	 { 2017-04-16T09:00, 2017-04-16T15:00 }] 
 
 	Args:
-		iso_begin_datetime:	str, isoformatted datetime describing the end date and time
+		iso_begin_datetime:	str, isoformatted datetime describing the begin date and time
 		iso_end_datetime:	str, isoformatted datetime describing the end date and time
 
 	Returns:
@@ -33,7 +33,7 @@ def init_frees_by_date(iso_begin_datetime, iso_end_datetime):
 										  	   minute=int(end_datetime.format('mm')))
 	avails = []
 	while True:
-		avails.append(timeslot.TimeSlot('Free Time', curr_begin_datetime.isoformat(), curr_end_datetime.isoformat()))
+		avails.append(timeslot.TimeSlot(curr_begin_datetime.isoformat(), curr_end_datetime.isoformat()))
 		if curr_begin_datetime.format('YYYY-MM-DD') == end_datetime.format('YYYY-MM-DD'):
 			break
 		else:
@@ -42,6 +42,42 @@ def init_frees_by_date(iso_begin_datetime, iso_end_datetime):
 	
 	return avails
 
+
+def free_times(raw_frees, raw_busys, duration):
+	"""
+	Returns the free times of a single user, calculated from the given time/date range,
+	and the calendars selected by the user. The times of busy events in the selected 
+	calendars will not be considered as free times. Free times less than the duration
+	of the meeting will also not be returned
+
+	Args:
+		raw_frees:	list of TimeSlot objects, representing the raw free timeslots
+		raw_busys:	list of TimeSlot objects, representing the raw busy times pulled
+					from all the selected calendars. Accepts [] as an argument, if
+					there were no selected calendars or no busy times in selected
+					calendars
+		duration:	str, h:mm of meeting duration
+
+	Returns:
+		A list of serialized timeslots dictionaries, containing:
+			begin_datetime:	str, isoformatted datetime
+			end_datetime:	str, isoformatted datetime
+	"""
+	result = []
+	if raw_busys == []:
+		# No busy times, so return raw free times as the resultant free times
+		result = timeslot.serialize_list(raw_frees)
+	else:
+		# Has busy times, so calculate resultant free times.
+		for free in raw_frees:
+			# For the raw free time of each date, find the free times
+			print('Trying {} to {}'.format(free.begin_datetime, free.end_datetime))
+			freebusy = free.find_freebusy_from(raw_busys, duration)
+			freetimes = freebusy[0]
+			print('Free times: {}'.format(freetimes))
+			sorted_ft = timeslot.sort_by_begin_time(freetimes, timeslot.ASCENDING)
+			result.extend(timeslot.serialize_list(sorted_ft))
+	return result
 
 def merge_single_list(busylist):
 	"""
@@ -70,3 +106,18 @@ def merge_single_list(busylist):
 	# Endfor: finish loose ends
 	finalized_blobs.append(potential_blob)
 	return finalized_blobs
+
+
+def intersect_two_lists(list_a, list_b):
+	"""
+	Finds the intersections between two lists of TimeSlots. Internally, each list 
+	should not have any TimeSlots that intersect
+	"""
+	result = [ ]
+	for item_a in list_a:
+		for item_b in list_b:
+			intersect = item_a.intersect(item_b)
+			if intersect:
+				result.append(intersect)
+
+	return result

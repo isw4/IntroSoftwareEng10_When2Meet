@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<div class='jumbotron'>
+	<h1>When2Meet: Respond to Meeting</h1>
+</div>
+
+<div class="container">
+	<form action="{{ session.submit_route }}" method="post">
+	<div class='row'>
+		<div class='col'>
+			<h3>Your free times</h3>
+			<p>Select which free times you would like to schedule your meeting in</p>
+			<div class="row">
+			    <table class='table table-striped table-bordered'>
+					<thead>
+					    <tr class='bg-primary'>
+							<td><strong>+</strong></td>
+							<td><strong>Start Date-time</strong></td>
+							<td><strong>End Date-time</strong></td>
+					    </tr>
+					</thead>
+					<tbody>
+				    {% for i in session.freetimes %}
+					    <tr>
+							<td> 
+								<label class='form-check-label'>
+									<input type="checkbox" class='form-check-input' name="selected_freetimes" value='{{i.begin_datetime +"," +i.end_datetime }}'>
+								</label>
+							</td>
+							<td class='display-dt'> {{ i.begin_datetime|humanize_datetime }} </td>
+							<td class='display-dt'> {{ i.end_datetime|humanize_datetime }} </td>
+						</tr>
+				    {% endfor %}
+				</tbody>
+			  </table>
+			</div>
+		</div>
+
+		<div class='col'>
+			<h3>Description</h3>
+			<textarea name='description' class="form-control" maxlength="255" rows ="6" readonly>{{ session.desc }}</textarea>
+			
+			<br>
+			
+			<button type='submit' class='btn btn-primary'>Submit</button>
+		</div>
+	</div>
+	</form>
+</div>
+
+{% endblock %}

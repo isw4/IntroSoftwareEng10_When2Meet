@@ -1,0 +1,85 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<div class='jumbotron'>
+	<h1>When2Meet: Check Meeting Status</h1>
+</div>
+
+<div class='container'>
+	<div class='row'>
+		<h3>Description</h3>
+		<textarea name='description' class="form-control" maxlength="255" rows ="6" readonly>{{ session.desc }}</textarea>
+	</div>
+
+	<hr>
+	<div class='row'>
+		<div class='col-md-4'>
+			<h3>Invitee Response Status</h3>
+			<table class="table table-striped table-bordered">
+			    <thead>
+			    	<tr class='bg-info'>
+			 	    	<th>Invitee Email</th>
+		      			<th>Responded</th>
+		    		</tr>
+		    	</thead>
+			  	<tbody>
+			    {% for invitee in session.invitees %}
+			    	<tr>
+			    		<td>{{ invitee['email'] }}</td>
+			    		<td>
+			    			{% if invitee['responded'] %}
+			    				Yes
+			    			{% else %}
+			    				No
+			    			{% endif %}
+			    		</td>
+			    	</tr>
+			    {% endfor %}
+				</tbody>
+			</table>
+		</div>
+
+		<div class='col-md-8'>
+			<h3>Choose Meeting Time</h3>
+			<p>Displays the intersecting free times from the people who have already responded. You may choose to go ahead and organize the meeting now, from the current intersecting free times. Notifications will be sent to all invitees regardless of whether they have responded</p>
+			
+			{% if session.freetimes|length == 0 %}
+				<hr>
+				<form action='{{ url_for("index") }}' method='post'>
+					<p>There are no intersecting free times among those that have already responded. You will need to set a different time, or inform your invitees to make different arrangements</p>
+					<button type='submit' class='btn btn-primary'>Create New Meeting</button>
+				</form>
+			{% else %}
+				<form action='{{ session.submit_route }}' method='post'>
+					<table class="table table-striped table-bordered">
+					    <thead>
+					    	<tr class='bg-info'>
+					 	    	<th>Free Time Range</th>
+				      			<th>Select Start Time</th>
+				    		</tr>
+				    	</thead>
+				    	<tbody>
+				    		{% for ft in session.freetimes %}
+					    	<tr>
+					    		<td>
+					    			<label><input type="radio" class='form-control' name='radio'"' value='{{loop.index-1}}' required> {{ ft.begin_datetime|humanize_datetime }} to {{ ft.end_datetime|humanize_datetime }}<label>
+					    		</td>
+					    		<td>
+					    			<input type="datetime-local" class='form-control' name='selection'
+					    				value='{{ ft.begin_datetime|html_datetime_compatible }}'
+					    				min='{{ ft.begin_datetime|html_datetime_compatible }}' 
+					    				max='{{ (ft.end_datetime+","+session.duration)|html_datetime_compatible }}'>
+					    		</td>
+					    	</tr>
+					    	{% endfor %}
+						</tbody>
+					</table>
+					<button type='submit' class='btn btn-success'>Confirm Meeting</button>
+				</form>
+			{% endif %}
+		</div>
+	</div>
+</div>
+
+{% endblock %}

@@ -16,6 +16,38 @@ form {
 	width: 100%;
 }
 
+/* For jumbotron text */
+.jumbotron h1 {
+	text-align: center;
+}
+
+/* For description text */
 .bg-info {
 	text-align: center;
+}
+
+/* For index page button */
+button.login {
+	display:block;
+	margin:auto;
+}
+
+/* For stacked calendar checklist */
+.form-check-label {
+	display: block;
+}
+
+/* For create meeting submit button */
+div.submit {
+	padding:0;
+}
+
+/* For create meeting submit button */
+button.submit {
+	margin:auto 0;
+}
+
+/* For sending meeting confirmation button */
+a.confirm {
+	margin:auto;
 }

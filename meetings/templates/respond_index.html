@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<div class='jumbotron'>
+	<h1>When2Meet: Respond to Meeting</h1>
+</div>
+
+<div class='container'>
+	<div class='row'>
+		<div class='col-md-6'>
+			<h3>What is When2Meet?</h3>
+			<p>When2Meet is a minimal, privacy-conscious web application that helps users determine a common time to have a meeting. It requires all users to have a Google account, as it will read calendar data from Google Calendar. It also requires the meeting organizer to have all the perticipant's email addresses. More information on our github <a href="https://github.com/isw4/Proj10-when2meet">here</a></p>
+			<h3>Event Description</h3>
+			<textarea name='description' class="form-control" maxlength="255" rows ="8" readonly>{{ session.desc }}</textarea>
+		</div>
+		<div class='col-md-6'>
+			<h3>What do you need to do?</h3>
+			<p>To respond to the meeting, you will have to authorize access to your Google Calendar. You will then be allowed to choose which Calendars you want to treat as busy times. A list of your free times will be shown, and you will pick the times you want to submit as your free times. You will only be allowed to submit once, so pick wisely.</p>
+			<form action="{{ session.submit_route }}" method="post">
+				<button type="submit" class='login btn btn-success btn-lg'>Log In</button>
+			</form>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

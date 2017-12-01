@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<div class='jumbotron'>
+	<h1>When2Meet: Meeting Confirmed!</h1>
+</div>
+
+<div class='container'>
+	<div class='row'>
+		<h3>Description</h3>
+		<textarea name='description' class="form-control" maxlength="255" rows ="6" readonly>{{ session.desc }}</textarea>
+	</div>
+
+	<br>
+	<div class='row'>
+		<a  class='btn btn-success confirm' 
+			href="mailto:{{ session.send.emails }}?subject=When2Meet%20Notification&body={{ session.send.desc }}">
+			Send meeting notifications to all
+		</a>
+	</div>
+</div>
+
+{% endblock %}
