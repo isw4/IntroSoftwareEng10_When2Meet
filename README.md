@@ -45,20 +45,18 @@ It only stores the free times that the user selects, and the user's
 email address as provided by the organizer
 
 ### Data displayed
-Organizer:
-Can see: 
+Organizer can see: 
 - Who has responded
 - The free times that all responded participants have in common
 
-Cannot see:
+Organizer cannot see:
 - The free times selected by any single participant
 
-Participants:
-Can See:
+Participants can see:
 - Original date/time range the meeting was planned to be in
 - Meeting duration
 
-Cannot See:
+Participants cannot see:
 - Free times selected by organizer
 - Free times selected by other participants
 
