@@ -45,17 +45,20 @@ It only stores the free times that the user selects, and the user's
 email address as provided by the organizer
 
 ### Data displayed
-To organizer
-| Can See           | Cannot See |
-| ---               | --- |
-| Who has responded | The free times selected by any single participant |
-| The free times that all responded participants have in common | |
+Organizer:
+Can see: 
+- Who has responded
+- The free times that all responded participants have in common
+Cannot see:
+- The free times selected by any single participant
 
-Participants
-| Can See           | Cannot See |
-| ---               | --- |
-| Original date/time range the meeting was planned to be in | Free times selected by organizer |
-| Meeting duration | Free times selected by other participants
+Participants:
+Can See:
+- Original date/time range the meeting was planned to be in
+- Meeting duration
+Cannot See:
+- Free times selected by organizer
+- Free times selected by other participants
 
 
 ## To set up the server
